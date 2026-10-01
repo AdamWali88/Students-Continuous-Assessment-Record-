@@ -1,0 +1,5 @@
+const CACHE='students-ca-v24-shell-20260930-v1';
+const SHELL=['./','./index.html','./manifest.json','./sw.js','./icon-192.png','./icon-512.png'];
+self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==self.location.origin)return;e.respondWith((async()=>{if(e.request.mode==='navigate'){try{const r=await fetch(e.request);const c=await caches.open(CACHE);c.put('./index.html',r.clone());return r}catch(_){return caches.match('./index.html')}}const cached=await caches.match(e.request);if(cached)return cached;try{const r=await fetch(e.request);if(r.ok){const c=await caches.open(CACHE);c.put(e.request,r.clone())}return r}catch(_){return caches.match('./index.html')}})())});
